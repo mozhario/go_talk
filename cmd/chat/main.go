@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/mozhario/go_talk/chat/server"
-	"github.com/mozhario/go_talk/settings"
+	"github.com/mozhario/go_talk/chat/server/websocket"
+	"github.com/mozhario/go_talk/config/settings"
 )
 
 func main() {
-	server := server.Server{settings.ServerPort}
+	server := websocket.WebSocketServer{settings.ServerPort}
 	server.Listen()
 }
