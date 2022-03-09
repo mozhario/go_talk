@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
-	server := server.WebSocketServer{config.ServerPort}
+	server := server.WebSocketServer{
+		Host: config.ServerHost,
+		Port: config.ServerPort,
+	}
 	server.Listen()
 }
