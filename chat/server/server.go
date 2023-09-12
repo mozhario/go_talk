@@ -1,13 +1,14 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
-	// "log"
-
 	"net/http"
 	"os"
 
 	"github.com/gorilla/websocket"
+	"github.com/mozhario/go_talk/chat/db"
+	models "github.com/mozhario/go_talk/chat/models/message"
 )
 
 type WebSocketServer struct {
@@ -40,40 +41,34 @@ func (server WebSocketServer) Listen() {
 }
 
 func (server WebSocketServer) HandleRequest(conn *websocket.Conn) {
-	// Infinite loop to continuously read messages from the client
+	defer conn.Close()
 	for {
-		// Read message from the client
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Error reading message:", err.Error())
 			break
 		}
 
-		// Print the received message
 		fmt.Printf("Received message: %s\n", message)
 
-		// Send a response back to the client
-		err = conn.WriteMessage(websocket.TextMessage, []byte("Message received."))
+		server.SaveMessage(message)
+
+		err = conn.WriteMessage(websocket.TextMessage, []byte(message))
 		if err != nil {
 			fmt.Println("Error writing message:", err.Error())
 			break
 		}
 	}
-
-	// Close the connection when done
-	conn.Close()
 }
 
-// func (server WebSocketServer) HandleRequest(conn net.Conn) {
-// 	// Make a buffer to hold incoming data.
-// 	buf := make([]byte, 1024)
-// 	// Read the incoming connection into the buffer.
-// 	_, err := conn.Read(buf)
-// 	if err != nil {
-// 		fmt.Println("Error reading:", err.Error())
-// 	}
-// 	// Send a response back to person contacting us.
-// 	conn.Write([]byte("Message received."))
-// 	// Close the connection when you're done with it.
-// 	conn.Close()
-// }
+func (server WebSocketServer) SaveMessage(messageData []byte) error {
+	var message models.Message
+
+	err := json.Unmarshal(messageData, &message)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err.Error())
+		return err
+	}
+	db.DB.Create(&message)
+	return err
+}

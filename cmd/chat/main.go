@@ -6,12 +6,16 @@ import (
 
 	"github.com/mozhario/go_talk/routes"
 
+	"github.com/mozhario/go_talk/chat/db"
 	"github.com/mozhario/go_talk/chat/server"
 	"github.com/mozhario/go_talk/config"
 )
 
 func main() {
 	fmt.Println("GoTalk v0.01")
+
+	db.InitDB()
+	defer db.CloseDB()
 
 	go serveHTTP()
 	go serveWebSocket()
