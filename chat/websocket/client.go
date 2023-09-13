@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/gorilla/websocket"
+	"github.com/mozhario/go_talk/chat/constants"
 	models "github.com/mozhario/go_talk/chat/models/message"
 	"github.com/mozhario/go_talk/db"
 )
@@ -50,7 +51,8 @@ func (client Client) SaveMessage(messageData Message) {
 	db.DB.Create(&message)
 }
 
-func (client Client) parseMessage(messageData []byte, message interface{}) error {
+func (client Client) parseMessage(messageData []byte, message *Message) error {
 	err := json.Unmarshal(messageData, &message)
+	message.Type = constants.MessageTypeUserMessage
 	return err
 }
