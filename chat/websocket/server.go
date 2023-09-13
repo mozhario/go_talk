@@ -1,19 +1,17 @@
-package server
+package websocket
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/websocket"
-	"github.com/mozhario/go_talk/chat/db"
-	models "github.com/mozhario/go_talk/chat/models/message"
 )
 
 type WebSocketServer struct {
 	Host string
 	Port string
+	Pool *Pool
 }
 
 var upgrader = websocket.Upgrader{
@@ -23,6 +21,8 @@ var upgrader = websocket.Upgrader{
 }
 
 func (server WebSocketServer) Listen() {
+	go server.Pool.Start()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -42,33 +42,12 @@ func (server WebSocketServer) Listen() {
 
 func (server WebSocketServer) HandleRequest(conn *websocket.Conn) {
 	defer conn.Close()
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println("Error reading message:", err.Error())
-			break
-		}
 
-		fmt.Printf("Received message: %s\n", message)
-
-		server.SaveMessage(message)
-
-		err = conn.WriteMessage(websocket.TextMessage, []byte(message))
-		if err != nil {
-			fmt.Println("Error writing message:", err.Error())
-			break
-		}
+	client := &Client{
+		Conn: conn,
+		Pool: server.Pool,
 	}
-}
 
-func (server WebSocketServer) SaveMessage(messageData []byte) error {
-	var message models.Message
-
-	err := json.Unmarshal(messageData, &message)
-	if err != nil {
-		fmt.Println("Error parsing JSON:", err.Error())
-		return err
-	}
-	db.DB.Create(&message)
-	return err
+	server.Pool.Register <- client
+	client.Read()
 }

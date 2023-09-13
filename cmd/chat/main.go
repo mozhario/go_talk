@@ -7,7 +7,7 @@ import (
 	"github.com/mozhario/go_talk/routes"
 
 	"github.com/mozhario/go_talk/chat/db"
-	"github.com/mozhario/go_talk/chat/server"
+	"github.com/mozhario/go_talk/chat/websocket"
 	"github.com/mozhario/go_talk/config"
 )
 
@@ -34,9 +34,12 @@ func serveHTTP() {
 func serveWebSocket() {
 	fmt.Println("Websocket server startup")
 
-	server := server.WebSocketServer{
+	pool := websocket.NewPool()
+
+	server := websocket.WebSocketServer{
 		Host: config.ServerHost,
 		Port: config.WebscketPort,
+		Pool: pool,
 	}
 	server.Listen()
 }
