@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mozhario/go_talk/routes"
-
-	"github.com/mozhario/go_talk/chat/db"
+	"github.com/mozhario/go_talk/chat/http_server"
 	"github.com/mozhario/go_talk/chat/websocket"
 	"github.com/mozhario/go_talk/config"
+	"github.com/mozhario/go_talk/db"
 )
 
 func main() {
@@ -27,8 +26,11 @@ func serveHTTP() {
 	fmt.Println("HTTP server startup")
 
 	mux := http.NewServeMux()
-	routes.SetupRoutes(mux)
-	http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), mux)
+
+	server := http_server.HTTPServer{
+		Mux: mux,
+	}
+	server.Listen()
 }
 
 func serveWebSocket() {

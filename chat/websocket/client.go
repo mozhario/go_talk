@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/gorilla/websocket"
-	"github.com/mozhario/go_talk/chat/db"
 	models "github.com/mozhario/go_talk/chat/models/message"
+	"github.com/mozhario/go_talk/db"
 )
 
 type Client struct {

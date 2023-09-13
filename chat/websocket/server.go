@@ -32,7 +32,7 @@ func (server WebSocketServer) Listen() {
 		server.HandleRequest(conn)
 	})
 
-	fmt.Println("Listening on " + server.Host + ":" + server.Port)
+	fmt.Println("WebSocket server listening on " + server.Host + ":" + server.Port)
 	err := http.ListenAndServe(fmt.Sprintf("%s:%s", server.Host, server.Port), nil)
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
