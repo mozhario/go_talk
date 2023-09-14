@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mozhario/go_talk/chat/constants"
 	models "github.com/mozhario/go_talk/chat/models/message"
-	"github.com/mozhario/go_talk/db"
 )
 
 type Client struct {
@@ -30,28 +29,18 @@ func (client *Client) Read() {
 			return
 		}
 
-		var parsedMessage Message
+		var parsedMessage models.Message
 		if err := client.parseMessage(msg, &parsedMessage); err != nil {
 			fmt.Println("Error parsing JSON:", err.Error())
 			break
 		}
-
-		client.SaveMessage(parsedMessage)
 
 		client.Pool.Broadcast <- parsedMessage
 		fmt.Printf("Message Received: %+v\n", parsedMessage)
 	}
 }
 
-func (client Client) SaveMessage(messageData Message) {
-	message := models.Message{
-		Username: messageData.Username,
-		Text:     messageData.Text,
-	}
-	db.DB.Create(&message)
-}
-
-func (client Client) parseMessage(messageData []byte, message *Message) error {
+func (client Client) parseMessage(messageData []byte, message *models.Message) error {
 	err := json.Unmarshal(messageData, &message)
 	message.Type = constants.MessageTypeUserMessage
 	return err
